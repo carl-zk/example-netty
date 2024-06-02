@@ -16,7 +16,7 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
 	private int counter = 0;
 
 	public TimeClientHandler() {
-		req = ("QUERY TIME ORDER" + TimeServerHandler.lINE_SEPARATOR).getBytes();
+		req = ("QUERY TIME ORDER" + TimeServerHandler.LINE_SEPARATOR).getBytes();
 	}
 
 	@Override
@@ -30,17 +30,8 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		System.out.println("read");
-		ByteBuf buf = (ByteBuf) msg;
-		byte[] req = new byte[buf.readableBytes()];
-		buf.readBytes(req);
-		String body = new String(req, "UTF-8");
+		String body = (String) msg;
 		System.out.println("Now is : %s; the couter is %s".formatted(body, ++counter));
-	}
-
-	@Override
-	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-		ctx.close();
 	}
 
 	@Override
