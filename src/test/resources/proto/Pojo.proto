@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package tutorial;
+
+option java_multiple_files = true;
+option java_package = "com.example.netty.chapter8.pojo";
+option java_outer_classname = "FooProtos";
+
+// add comment
+/**
+abc
+*/
+message SearchRequest {
+    reserved 4,5;    // 删掉的、废弃的，防止后面被重复使用
+    reserved "field_name_a", "foo";
+    
+    string query = 1;
+    int32 page_number = 2;
+    int32 results_per_page = 3;
+    
+    repeated Result results = 6;
+    
+    map<string, string> projects = 7;
+}
+
+message Result {
+    string url = 1;
+    String title = 2;
+}
+
+// used for rpc 
+service SearchService {
+  rpc Search(SearchRequest) returns (SearchResponse);
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package chapter8;
+
+option java_multiple_files = true;
+option java_package = "com.example.netty.chapter8.pojo";
+option java_outer_classname = "SubscribeReqProtos";
+
+message SubscribeReq {
+    int32 subReqId = 1;
+    string userName = 2;
+    string productName = 3;
+    repeated string address = 4;
+}
