@@ -55,11 +55,8 @@
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>netty-pojo</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>D:\netty-pojo.jar</systemPath>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
     </dependencies>
 
     <build>
