@@ -1,9 +1,11 @@
 package com.example.netty.chapter12;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +24,8 @@ import lombok.ToString;
 @AllArgsConstructor
 public class Header {
 	public static final int CRC_CODE = 0xabef0101;
-	private int crcCode;
+	@Default
+	private int crcCode = 0xabef0101;
 	/**
 	 * 消息长度，包括整个消息头和body
 	 */
@@ -47,5 +50,7 @@ public class Header {
 	/**
 	 * 可选
 	 */
-	private Map<String, Object> attachment;// = new HashMap<>();
+
+	@Default
+	private Map<String, Object> attachment = new HashMap<>();
 }

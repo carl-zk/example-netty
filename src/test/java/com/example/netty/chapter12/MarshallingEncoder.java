@@ -15,13 +15,14 @@ import io.netty.handler.codec.marshalling.ThreadLocalMarshallerProvider;
  * @date 2024年6月14日 21:10:07
  */
 class MarshallingEncoder {
+	public static final MarshallingEncoder INSTANCE = new MarshallingEncoder();
 	private static final byte[] LENGTH_PLACEHOLDER = new byte[4];
 	MarshallerProvider provider;
 
 	/**
 	 *
 	 */
-	public MarshallingEncoder() {
+	private MarshallingEncoder() {
 		this.provider = new ThreadLocalMarshallerProvider(new RiverMarshallerFactory(), new MarshallingConfiguration());
 	}
 

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
@@ -13,7 +12,6 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  * @author Carl
  * @date 2024年6月14日 22:17:42
  */
-@Sharable
 public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
 	MarshallingDecoder decoder;
 
@@ -24,7 +22,7 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
 	 */
 	public NettyMessageDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) {
 		super(maxFrameLength, lengthFieldOffset, lengthFieldLength);
-		this.decoder = new MarshallingDecoder();
+		this.decoder = MarshallingDecoder.INSTANCE;
 	}
 
 	@Override
@@ -34,24 +32,31 @@ public class NettyMessageDecoder extends LengthFieldBasedFrameDecoder {
 			return null;
 		}
 		NettyMessage.NettyMessageBuilder builder = NettyMessage.builder();
-		Header.HeaderBuilder headerBuilder = Header.builder().crcCode(in.readInt()).length(in.readInt())
-				.sessionId(in.readLong()).type(in.readByte()).priority(in.readByte());
-		int size = in.readInt();
+		Header.HeaderBuilder headerBuilder = Header.builder().crcCode(frame.readInt()).length(frame.readInt())
+				.sessionId(frame.readLong()).type(frame.readByte()).priority(frame.readByte());
+		int size = frame.readInt();
 		if (size > 0) {
 			Map<String, Object> attach = new HashMap<>(size);
 			for (int i = 0; i < size; i++) {
-				int keySize = in.readInt();
+				int keySize = frame.readInt();
 				byte[] keyArray = new byte[keySize];
-				in.readBytes(keyArray);
+				frame.readBytes(keyArray);
 				String key = new String(keyArray, "UTF-8");
-				attach.put(key, this.decoder.decode(ctx, in));
+				attach.put(key, this.decoder.decode(ctx, frame));
 			}
 			headerBuilder.attachment(attach);
 		}
-		if (in.readableBytes() > 4) {
-			builder.body(this.decode(ctx, in));
+		if (frame.readableBytes() > 4) {
+			builder.body(this.decoder.decode(ctx, frame));
 		}
-		return builder.header(headerBuilder.build()).build();
+		NettyMessage message = builder.header(headerBuilder.build()).build();
+		return message;
+	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		cause.printStackTrace();
+		super.exceptionCaught(ctx, cause);
 	}
 
 }

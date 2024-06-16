@@ -6,12 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Carl
  * @date 2024年6月15日 13:29:00
  */
+@Slf4j
 public class LoginAuthRespHandler extends ChannelInboundHandlerAdapter {
 	private Map<String, Boolean> nodeCheck = new ConcurrentHashMap<>();
 	private String[] whiteList = { "127.0.0.1" };
@@ -19,13 +21,15 @@ public class LoginAuthRespHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		NettyMessage message = (NettyMessage) msg;
+		String nodeIndex = ctx.channel().remoteAddress().toString();
+		log.debug("nodeIndex is:{}", nodeIndex);
 		if (message.getHeader() != null && 3 == message.getHeader().getType()) {
-			String nodeIndex = ctx.channel().remoteAddress().toString();
-			System.out.println("nodeIndex:" + nodeIndex);
+			log.debug("the hand shake request:" + message);
 			NettyMessage loginResp = null;
 			if (this.nodeCheck.containsKey(nodeIndex)) {
 				// 重复登录，拒绝
 				loginResp = this.build((byte) -1);
+				log.info("{} 禁止重复登录", nodeIndex);
 			} else {
 				InetSocketAddress remoteIp = (InetSocketAddress) ctx.channel().remoteAddress();
 				String ip = remoteIp.getAddress().getHostAddress();
@@ -39,12 +43,16 @@ public class LoginAuthRespHandler extends ChannelInboundHandlerAdapter {
 				loginResp = isAllowed ? this.build((byte) 0) : this.build((byte) -1);
 				if (isAllowed) {
 					this.nodeCheck.put(nodeIndex, true);
+					log.info("{} login success", nodeIndex);
 				}
 			}
-			System.out.println("The login response is:" + loginResp);
 			ctx.writeAndFlush(loginResp);
 		} else {
-			ctx.fireChannelRead(msg);
+			if (this.nodeCheck.containsKey(nodeIndex)) {
+				ctx.fireChannelRead(msg);
+			} else {
+				ctx.writeAndFlush(this.build((byte) -2));
+			}
 		}
 	}
 

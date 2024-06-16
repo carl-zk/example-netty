@@ -16,12 +16,13 @@ import io.netty.handler.codec.marshalling.UnmarshallerProvider;
  * @date 2024年6月14日 22:19:28
  */
 class MarshallingDecoder {
+	public static final MarshallingDecoder INSTANCE = new MarshallingDecoder();
 	UnmarshallerProvider provider;
 
 	/**
 	 *
 	 */
-	public MarshallingDecoder() {
+	private MarshallingDecoder() {
 		this.provider = new ThreadLocalUnmarshallerProvider(new RiverMarshallerFactory(),
 				new MarshallingConfiguration());
 	}
