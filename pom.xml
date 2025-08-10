@@ -78,28 +78,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.jibx</groupId>
-                <artifactId>jibx-maven-plugin</artifactId>
-                <configuration>
-                    <schemaBindingDirectory>
-                        src/test/java/com/example/netty/chapter10/pojo</schemaBindingDirectory>
-                    <includeSchemaBindings>
-                        <includeSchemaBindings>*-binding.xml</includeSchemaBindings>
-                    </includeSchemaBindings>
-                    <excludeSchemaBindings>
-                        <excludeSchemaBinding>template-binding.xml</excludeSchemaBinding>
-                    </excludeSchemaBindings>
-                    <verbose>true</verbose>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>bind</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

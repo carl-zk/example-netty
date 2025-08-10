@@ -8,6 +8,37 @@ futher more:
 ctx.write() 是从当前位置往前找
 ctx.channel().write() 是从 tail 往前找
 
+## template
+
+```java
+		EventLoopGroup bossGroup = new NioEventLoopGroup(
+				new ThreadFactoryBuilder().setNameFormat("boss-group-%d").build());
+		EventLoopGroup workerGroup = new NioEventLoopGroup(
+				new ThreadFactoryBuilder().setNameFormat("worker-group-%d").build());
+		try {
+			ServerBootstrap b = new ServerBootstrap();
+			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+					.option(ChannelOption.SO_BACKLOG, 1000)
+					.childOption(ChannelOption.SO_KEEPALIVE, true)
+					.childOption(ChannelOption.TCP_NODELAY, true)
+					.handler(new LoggingHandler(LogLevel.DEBUG))
+					.childHandler(new ChannelInitializer<SocketChannel>() {
+
+						@Override
+						protected void initChannel(SocketChannel ch) throws Exception {
+							ch.pipeline().addLast(new NettyMessageDecoder(1024 * 1024, 4, 4))
+									.addLast(new NettyMessageEncoder()).addLast(new ReadTimeoutHandler(50))
+									.addLast(new LoginAuthRespHandler()).addLast(new HeartBeatRespHandler());
+						}
+					});
+			ChannelFuture f = b.bind(new InetSocketAddress(port)).sync();
+			f.channel().closeFuture().sync();
+		} finally {
+			bossGroup.shutdownGracefully();
+			workerGroup.shutdownGracefully();
+		}
+```
+
 ## protobuf
 `protoc.exe --java_out=. ./SubscribeReq.proto ./SubscribeResp.proto`
 
